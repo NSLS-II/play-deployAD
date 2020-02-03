@@ -1,0 +1,3 @@
+ansible-playbook -i ./hosts -K deploy.yml --limit=ISS
+# small k will promt for the password for ssh
+# K propmting sudo access

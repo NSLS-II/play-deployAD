@@ -1,0 +1,48 @@
+---
+- name: Deploy InstalSynApps on a target host
+  hosts: all
+  become: true
+  vars:
+          deployment_dir: /opt/epics
+
+  tasks:
+          - name: The following is installed= git, python3, gcc, gcc-c++, cmake, libxml2-devel, boost-devel, libusb-devel, libusbx-devel, pcre-devel, re2c, libXext-devel,readline-devel
+            yum:
+                    name: "{{ packages }}"
+                    state: present
+            vars: 
+                    packages:
+                            - git
+                            - python3
+                            - gcc
+                            - gcc-c++ 
+                            - cmake
+                            - libxml2-devel
+                            - boost-devel
+                            - libusb-devel
+                            - libusbx-devel
+                            - pcre-devel
+                            - re2c 
+                            - libXext-devel
+                            - readline-devel
+
+          - name: directory create/check if exists 
+            file:
+                    path: "{{deployment_dir}}/epicsDeploy"
+                    state: directory
+          - name: clone installSynApps 
+            git:
+                    clone: yes
+                    update: no
+                    dest: "{{deployment_dir}}/epicsDeploy/installSynApps"
+                    repo: https://github.com/epicsNSLS2-deploy/installSynApps
+            environment:
+                    https_proxy: https://proxy:8888
+          - name: run installSynApps buid script
+            shell: ./installCLI.py -i {{deployment_dir}} -y -l -p >> installCLI.log
+            args: 
+                    chdir:  "{{deployment_dir}}/epicsDeploy/installSynApps"
+                    creates: ../installCLI.log
+            environment:
+                    https_proxy: https://proxy:8888
+                    http_proxy: http://proxy:8888
