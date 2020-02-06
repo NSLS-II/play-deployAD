@@ -1,0 +1,54 @@
+---
+- name: Deploy InstalSynApps on a Debian target host
+  hosts: all
+  become: true
+  vars:
+          deployment_dir: /opt/epics
+
+  tasks:
+          - name: The following is installed= git, python3, gcc, gcc-c++, cmake, make libxml2-devel, boost-devel, libusb-devel, libusbx-devel, pcre-devel, re2c, libXext-devel,readline-devel
+            apt:
+                    name: "{{ packages }}"
+                    state: present
+            vars: 
+                    packages:
+                            - git
+                            - python3
+                            - gcc
+                            - g++ 
+                            - cmake
+                            - make
+                            - libxml2-dev
+                            - libboost-dev
+                            - libusb-dev
+                            - libpcre3-dev
+                            - re2c 
+                            - libx11-dev
+                            - libxext-dev
+                            - libopencv-dev
+                            - libzbar-dev
+                            - libreadline-dev
+                            - libusb-1.0-0-dev
+                            - libdmtx-dev
+                    forse_apt_get: yes
+
+          - name: directory create/check if exists 
+            file:
+                    path: "{{deployment_dir}}/epicsDeploy"
+                    state: directory
+          - name: clone installSynApps 
+            git:
+                    clone: yes
+                    update: no
+                    dest: "{{deployment_dir}}/epicsDeploy/installSynApps"
+                    repo: https://github.com/epicsNSLS2-deploy/installSynApps
+            environment:
+                    https_proxy: https://proxy:8888
+          - name: run installSynApps buid script
+            shell: ./installCLI.py -i {{deployment_dir}} -y -l -p >> installCLI.log
+            args: 
+                    chdir:  "{{deployment_dir}}/epicsDeploy/installSynApps"
+                    creates: ../installCLI.log
+            environment:
+                    https_proxy: https://proxy:8888
+                    http_proxy: http://proxy:8888
