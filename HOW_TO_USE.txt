@@ -1,0 +1,5 @@
+ansible-playbook -i ./hosts -K deploy.yml --limit=ISS
+# small k will promt for the password for ssh
+# K propmting sudo access
+
+oksana@ansible02:~/play-deployAD$ ansible-playbook -i ./hosts -Kk deployEiger.yml --limit BMM --extra-vars ioc_name="test" 

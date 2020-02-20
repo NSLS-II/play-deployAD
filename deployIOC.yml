@@ -1,0 +1,66 @@
+---
+- name: Deploy eiger IOC on a target host
+  hosts: all
+  become: true
+  vars:
+      deployment_dir: /epics/iocs
+  tasks:    
+      - name: make sure /epics/iocs exists
+        file:
+            path: {deployment_dir}
+            state: directory   
+            owner: softioc
+            group: controls
+            mode: '0775'
+      - name: create dir ioc_name if it does not exists  
+        file:
+            path: "{{deployment_dir}}/{{ioc_name}}"
+            state: directory
+            group: controls
+            mode: '0775'
+      - name: create atosave folder  
+        file:
+            path: "{{deployment_dir}}/{{ioc_name}}/autosave"
+            state: directory
+            owner: softioc
+            group: controls
+            mode: '0775'      
+      - name: copy eiger st.cmd to ioc_name
+        copy:
+            src: /opt/epics/support/areaDetector/ADEiger/iocs/eigerIOC/iocBoot/iocEiger/st.cmd
+            remote_src: yes
+            dest: "{{deployment_dir}}/{{ioc_name}}/st.cmd"
+            owner: softioc
+            group: controls
+            mode: u=rw,g=rw,o=r
+      - name: create envPaths soft link
+        file:
+            src: /opt/epics/support/areaDetector/ADEiger/iocs/eigerIOC/iocBoot/iocEiger/envPaths
+            dest: "{{deployment_dir}}/{{ioc_name}}/envPaths"
+            owner: softioc
+            group: controls
+            mode: u=r,g=r,o=r
+            state: link
+      - name: create auto_settings.req soft link
+        file:
+            src: /opt/epics/support/areaDetector/ADEiger/iocs/eigerIOC/iocBoot/iocEiger/auto_settings.req
+            dest: "{{deployment_dir}}/{{ioc_name}}/auto_settings.req"
+            owner: softioc
+            group: controls
+            mode: u=r,g=r,o=r
+            state: link
+      - name: copy config from deployment machine to the target {deployment_dir}/{ioc_name}
+        copy:
+            src: config
+            dest: "{{deployment_dir}}/{{ioc_name}}/config"
+            owner: softioc
+            group: controls
+            mode: u=rw,g=rw,o=r      
+      - name: copy unique.cmd from deployment machine to the target {deployment_dir}/{ioc_name}
+        copy:
+            src: unique.cmd
+            dest: "{{deployment_dir}}/{{ioc_name}}/unique.cmd"
+            owner: softioc
+            group: controls
+            mode: u=rw,g=rw,o=r            
+            
